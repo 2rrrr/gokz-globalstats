@@ -1,0 +1,608 @@
+body{
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-width: 320px;
+}
+
+ /*滚动条整体样式*/
+ ::-webkit-scrollbar {
+    width: 10px;
+    height: 1px;
+}
+/*滚动条滑块*/
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 5px rgba(255,255,255,0.8);
+    background: rgb(128, 128, 128);
+}
+/*滚动条轨道*/
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 1px rgba(255,255,255,0.8);
+    border-radius: 10px;
+    background: #ccc;
+}
+
+#star{
+    position: fixed;
+}
+
+input[type=text]{
+    background: transparent;
+    border: none;
+    border-bottom: 1px #dddfd4 solid;
+    border-radius: 3px;
+    color: #fff;
+    margin: 8px 0px;
+    outline: none;
+    text-align: center;
+    font-family: jaldi;
+    font-size: 18px;
+    transition: .3s;
+}
+
+.layui-bg-tran{
+    background-color: rgba(10, 48, 77, 0.507)!important;
+}
+
+.background-img {
+	background: url(/assets/images/bg.webp) no-repeat;
+	background-size: cover;
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	z-index: -10;
+	background-position: center 0;
+	background-repeat: no-repeat;
+	background-size: cover;
+	-webkit-background-size: cover;
+	-o-background-size: cover;
+	zoom: 1;
+}
+
+.background {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	overflow: hidden;
+	background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0.8));
+    z-index: 0;
+    opacity: 0.9;
+}
+
+.logo{
+    position: absolute;
+    top: 13px;
+}
+
+.header-logo{
+    max-height: 34px;
+}
+
+.header-title{
+    color: #fff;
+    font-family: satisfy,cursive;
+    font-weight: 700;
+    font-size: 24px;
+}
+
+.header .layui-form{
+    left: 300px;
+}
+
+.header .layui-form-checkbox[lay-skin=primary]{
+    height: 0!important;
+}
+
+.header .layui-form-checked span,
+.header .layui-form-checked:hover span{
+    background: transparent;
+}
+
+.header .layui-form-checkbox[lay-skin=primary] span{
+    color: #f0f0f0;
+}
+
+.layui-form-checked[lay-skin=primary] i {
+    border-color: #93d1ff!important;
+    background-color: #93d1ff;
+    color: #fff;
+}
+
+.layui-form-checkbox[lay-skin=primary]:hover i{
+    border-color: #93d1ff;
+}
+
+.header input{
+    margin: 0 auto;
+}
+
+.header input:focus{
+    background: rgba(255,255,255,0.075);
+    border-bottom: 1px #93d1ff solid;
+    box-shadow: inset 0 0 5px rgba(255,255,255,0.5);
+    transition: .25s;
+}
+
+.header .layui-nav{
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 0;
+    background: none;
+}
+
+.footer{
+    position: relative;
+    margin-top: -56px;
+    bottom: 0;
+    height: 56px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footer .footer-linklist{
+    margin: 0 50px;
+    z-index: 1;
+    color: #bbb;
+    font-family: jaldi;
+}
+
+.footer .footer-icon{
+    margin: 0 20px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footer .link-font{
+    color: #d5d5d5;
+}
+
+.footer .link-font:hover{
+    color: #ffffff;
+}
+
+.footer .seperator{
+    margin: 0 10px;
+    color: #d5d5d5;
+}
+
+.footer i{
+    color: #d5d5d5;
+    transform: scale(1);
+    -moz-transform: scale(1);
+    -o-transform: scale(1);
+    transition: 0.5s;
+}
+
+.footer i:hover{
+    color: #ffffff;
+    transform: scale(0.8);
+    -moz-transform: scale(0.8);
+    -o-transform: scale(0.8);
+}
+
+.footer .blur{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    filter: blur(5px) brightness(0.65);
+    background: url(/assets/images/bg.webp) no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    z-index: 0;
+}
+
+.layui-main{
+    padding-bottom: 50px;
+}
+
+.layui-bg-tran .layui-nav-bar, 
+.layui-bg-tran .layui-nav-itemed:after, 
+.layui-bg-tran .layui-this:after {
+    background-color: #93D1FF;
+}
+
+.layui-nav *{
+    font-size: 16px;
+}
+
+.layui-nav-item,
+.layui-nav-child{
+    font-family: jaldi;
+}
+
+.layui-container{
+    background: rgba(0,0,0,0.3);
+    box-shadow: 0 0 2px;
+    margin-top: 65px;
+    padding: 20px 15px;
+    width: calc(100% - 24px);
+    max-width: 1210px;
+}
+
+.steamid-body{
+    text-align: center;
+    vertical-align: middle;
+}
+
+#steamButton{
+    box-shadow: 0 0 25px;
+    text-shadow: 0 0 20px;
+}
+
+.link-font{
+    color: #f0f0f0;
+    font-family: jaldi;
+    transition: .4s;
+    display: inline-block;
+}
+
+.link-font:hover{
+    color: #93d1ff;
+    transition: ease-in-out .4s;
+}
+
+.steamid-body input:focus{
+    background: rgba(255,255,255,0.075);
+    border-bottom: 1px #93d1ff solid;
+    box-shadow: inset 0 0 5px rgba(255,255,255,0.5);
+    transition: .25s;
+}
+
+.steamid-body input[type=text]{
+    min-width: 220px;
+}
+
+input::-webkit-input-placeholder { /* WebKit browsers 适配谷歌 */
+    color: #fff;
+}
+
+.layui-form-radio > i:hover, .layui-form-radioed > i {
+    color: #93d1ff;
+}
+
+.layui-form-radio > div {
+    font-family: jaldi;
+    font-size: 15px;
+    color: #fff;
+}
+
+.layui-btn {
+    font-family: jaldi;
+}
+
+#playerInfo{
+    margin: 17px 0;
+}
+
+#playerInfo div{
+    text-align: center;
+    font-family: Montserrat;
+    color: #f0f0f0;
+    font-size: 14px;
+    padding: 5px 0px 5px 0px;
+}
+
+#playerInfo .divider{
+    font-size: 26px;
+    font-family: jaldi;
+    font-weight: 700;
+    border-bottom: 2px solid #ddd;
+    margin: 0 auto;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 80%;
+    padding: 0;
+}
+
+#playerInfo #playerLink{
+    font-size: 30px;
+    line-height: 30px;
+}
+
+#playerInfo #playerPoints{
+    font-size: 19px;
+}
+
+#playerInfo #playerTimes{
+    font-size: 16px;
+}
+
+#playerInfo #playerRank{
+    font-size: 15px;
+}
+
+#playerInfo #playerAvatar img {
+    width: 125px;
+    height: 125px;
+    cursor: default;
+    border-radius: 5px;
+    border: 3px solid #ccc;
+    box-shadow: 0 0 5px;
+}
+
+#playerProgress div{
+    text-align: center;
+}
+
+#progressTypeChooser{
+    margin-top: 16px;
+}
+
+.layui-form-checkbox{
+    height: 24px;
+    line-height: 24px;
+    background-color: rgba(255,255,255,0.9);
+    left: 10px;
+    top: 17px;
+    font-family: jaldi;
+    border-radius: 7px;
+    transition: .3s linear;
+}
+
+.layui-form-checkbox span{
+    border-radius: 7px;
+    font-size: 16px;
+    color: #f0f0f0;
+}
+
+.layui-form-checkbox i{
+    border-radius: 7px;
+}
+
+.layui-form-checked,
+.layui-form-checked:hover {
+    border-color: #93d1ff;
+    color: rgb(136, 201, 223);
+}
+
+.layui-form-checked span,
+.layui-form-checked:hover span {
+    background-color: rgb(136, 201, 223);
+}
+
+.layui-form-checked i,
+.layui-form-checked:hover i {
+    color: #93d1ff;
+}
+
+.layui-form-checkbox i{
+    height: 22px;
+}
+
+.Tips{
+    text-align: center;
+}
+.Tip{
+    color: #eee;
+    padding: 2px 0;
+}
+
+.table-link{
+    cursor: pointer;
+    transition: .3s;
+    color: #f0f0f0;
+}
+
+.table-link:hover{
+    color: #93d1ff;
+}
+
+.handsontable{
+    margin: auto;
+}
+
+#sheetContainer,
+.table-container{
+    overflow-x: auto;
+}
+
+.handsontable .wtHider{
+    margin: 0 auto;
+}
+
+.handsontable td,
+.handsontable th{
+    color: #f0f0f0;
+    text-align: center;
+    font-family: jaldi;
+    font-size: 16px;
+    border-right: none;
+}
+
+.handsontable .htDimmed {
+    color: #f0f0f0;
+}
+
+.handsontable td{
+    background: transparent;
+    vertical-align: middle;
+}
+
+.handsontable th{
+    background: transparent;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.handsontable tr{
+    background: transparent;
+}
+
+.handsontable .blur{
+    position: absolute;
+    width: calc(100% - 5.5px);
+    height: 100%;
+    left: 2.5px;
+    top: -4px;
+    filter: blur(3px) brightness(0.65);
+    background: url(/assets/images/bg.webp) no-repeat;
+    background-attachment: fixed;
+    background-size: contain;
+}
+
+.ht_master tr:nth-of-type(even)>td {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.handsontable input{
+    background: transparent;
+    border: none;
+    border-bottom: 1px #dddfd4 solid;
+    border-radius: 3px;
+    color: #fff;
+    outline: none;
+    text-align: center;
+    font-family: jaldi;
+    font-size: 16px;
+    transition: .3s;
+    height: 22px;
+    margin-bottom: 5px;
+    width: 80%;
+}
+
+.handsontable input:focus{
+    background: rgba(255,255,255,0.075);
+    border-bottom: 1px #93d1ff solid;
+    box-shadow: inset 0 0 5px rgba(255,255,255,0.5);
+    transition: .3s;
+}
+
+.handsontable td:first-of-type{
+    border-left: none;
+}
+
+.handsontable th:first-child{
+    border-left: none;
+}
+
+.handsontable th:last-child{
+    border-right: none;
+}
+
+.handsontable tbody th.ht__active_highlight,
+.handsontable thead th.ht__active_highlight,
+.handsontable tbody th.ht__highlight,
+.handsontable thead th.ht__highlight{
+    background-color: #93d0ff25;
+}
+
+#mapInfoContainer{
+    margin-top: 10px;
+    display: none;
+}
+
+.mapNameAndImage{
+    text-align: center;
+    padding: 35px 0;
+}
+
+.mapNameAndImage #mapName{
+    font-family: jaldi;
+    color: #f0f0f0;
+    font-size: 25px;
+    padding: 6px 0;
+}
+
+.mapNameAndImage #mapTier,
+.mapNameAndImage #mapMode{
+    font-family: Montserrat;
+    color: #f0f0f0;
+    font-size: 15px;
+    padding-bottom: 5px;
+}
+
+.mapNameAndImage #pro-wr,
+.mapNameAndImage #tp-wr{
+    font-family: Montserrat;
+    color: #f0f0f0;
+    font-size: 18px;
+    padding: 5px 0;
+}
+
+.mapNameAndImage #mapImage{
+    padding: 5px 0;
+}
+
+.mapNameAndImage #mapImage img{
+    width: 85%;
+    border: 2px solid #ccc;
+    box-shadow: 0 0 10px #fff;
+    border-radius: 4px;
+}
+
+.chartContainer{
+    height: 427px;
+    position: relative;
+}
+
+.table-title{
+    display: flex;
+    justify-content: center;
+    height: 60px;
+    align-items: center;
+    font-family: Montserrat;
+    color: #f0f0f0;
+    font-size: 22px;
+}
+
+@media (max-width: 1024px){
+    .logo{
+        position: static;
+    }
+
+    .header .layui-form{
+        left: auto;
+    }
+
+    .header .layui-nav{
+        position: static;
+        right: auto;
+        top: auto;
+    }
+
+    #playerContainer > [class*='layui-col-'],
+    #mapInfoContainer .layui-row > [class*='layui-col-']{
+        width: 100%;
+    }
+
+    .chartContainer{
+        margin-top: 16px;
+        height: 360px;
+    }
+
+    .mapNameAndImage{
+        padding: 18px 0;
+    }
+
+    .footer{
+        height: auto;
+        min-height: 56px;
+        flex-direction: column;
+        padding: 8px 0;
+    }
+
+    .footer .footer-linklist{
+        margin: 0 20px;
+        text-align: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce){
+    *,
+    *::before,
+    *::after{
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

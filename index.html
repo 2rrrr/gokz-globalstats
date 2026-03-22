@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <meta name="description" content="GOKZ Globalstats - view global player records, map progression and top rankings.">
+        <title>GOKZ Globalstats</title>
+        <link rel="shortcut icon" href="/favicon.ico">
+        <link rel="preload" href="./assets/images/bg.webp" as="image" fetchpriority="high">
+        <link rel="stylesheet" href="./assets/css/layui.css" />
+        <link rel="stylesheet" href="./assets/css/font-awesome.css">
+        <link rel="stylesheet" href="./assets/css/font_Satisfy.css">
+        <link rel="stylesheet" href="./assets/css/font_Jaldi.css">
+        <link href="./assets/css/font_Montserrat.css" rel="stylesheet">
+        <link href="./assets/css/handsontable.full.min.css" rel="stylesheet">
+        <script src="./assets/js/jquery.min.js"></script>
+        <script src="./assets/js/layui.js"></script>
+        <script src="./assets/js/handsontable.full.min.js"></script>
+        <script src="./assets/js/Chart.min.js"></script>
+        <script src="./assets/js/statutils.js"></script>
+        <script src="./assets/js/bigInteger.js"></script>
+        <script src="./assets/js/kz_v2.4.js"></script>
+        <link rel="stylesheet" href="./assets/css/kz_v2.0.css">
+        <link rel="stylesheet" href="./assets/css/progressBar_v2.0.css">
+    </head>
+
+    <body>
+        <div class="layui-layout layui-layout-admin">
+            <div class="background-img"></div>
+            <div class="background"></div>
+
+            <canvas id='star' aria-hidden="true"></canvas>
+
+            <div class="layui-header header layui-bg-tran">
+                <div class="layui-main">
+                    <a class="logo" href="/">
+                        <img src="./assets/images/kzlogo.png" class="header-logo" alt="GOKZ Globalstats Logo" width="34" height="34">
+                        <span class="header-title">GOKZ Globalstats</span>
+                    </a>
+                    <div class="layui-form layui-inline">
+                        <div class="layui-input-inline" style="top: 14px;">
+                            <input type="text" id="steamid-persistent-input" oninput="updateCheckPersistentSteamID()" placeholder="Enter SteamID" autocomplete="off" aria-label="Persistent SteamID input">
+                        </div>
+                        <div class="layui-input-inline">
+                            <input type="checkbox" id="steamid-persistent-checkbox" title="Remember SteamID" lay-skin="primary" lay-filter="steamIDPersistentCheckbox">
+                        </div>
+                    </div>
+                    <ul class="layui-nav">
+                        <li id="nav-kzt" class="layui-nav-item"><a href="./?mode=kzt">KZTimer</a></li>
+                        <li id="nav-skz" class="layui-nav-item"><a href="./?mode=skz">SimpleKZ</a></li>
+                        <li id="nav-vnl" class="layui-nav-item"><a href="./?mode=vnl">Vanilla</a></li>
+                        <li id="nav-bonus" class="layui-nav-item"><a href="./?mode=bonus">Bonus</a></li>
+                        <li class="layui-nav-item">
+                            <a href="https://steamid.io/lookup/" target="_blank" rel="noopener noreferrer"><i class="layui-icon layui-icon-search"></i>&nbsp;Steam ID Lookup</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="layui-main">
+                <div class="layui-container">
+
+                    <div class="steamid-body">
+                        <div class="layui-form layui-inline">
+                            <div class="layui-input-inline">
+                                <input type="text" id="steamIDText" name="steamID" placeholder="Enter Your SteamID" style="height: 36px;" autocomplete="off" aria-label="SteamID input">
+                            </div>
+                            &nbsp;
+                            <input type="radio" name="isprorun" id="tprun" value="TP" title="TP" checked>
+                            <input type="radio" name="isprorun" id="prorun" value="Pro" title="Pro">  
+                        </div>
+                        <button id="steamButton" class="layui-btn layui-bg-tran">Fetch Times</button>
+                    </div>
+
+                    <div class="layui-row" id="playerContainer">
+                        <div class="layui-col-xs4" id="playerInfo">
+                            <div class="divider" id="runtype-divider">TP Runs</div>
+                            <div id="playerAvatar">
+                                <img src="./assets/images/kzlogo.png" alt="Player Avatar" width="125" height="125">
+                            </div>
+                            <div id="playerName"><a href="" class="link-font" id="playerLink" target="_blank" rel="noopener noreferrer"></a></div>
+                            <div id="playerRank"></div>
+                            <div id="playerPoints"></div>
+                            <div id="playerTimes"></div>
+                            <div id="playerTops">
+                                🏆<span id="wr">0</span>&nbsp;
+                                🥈<span id="silver">0</span>&nbsp;
+                                🥉<span id="bronze">0</span>
+                            </div>
+                        </div>
+
+                        <div class="layui-col-xs8" id="playerProgess">
+                            <div class="layui-form layui-row" id="progressTypeChooser">
+                                <div class="layui-col-xs4 layui-col-xs-offset3">
+                                    <select id="progressType" lay-filter="progressChange">
+                                        <option value="bar-total">Total Completions</option>
+                                        <option value="bar-avg">Average Points</option>
+                                        <option value="bar-wr">🏆 World Records</option>
+                                        <option value="bar-silver">🥈 Silver (900+ pts)</option>
+                                        <option value="bar-bronze">🥉 Bronze (800+ pts)</option>
+                                    </select>
+                                </div>
+                                <div class="layui-col-xs5">
+                                    <input type="checkbox" id="normalize-checkbox" title="Percentage" lay-filter="checkboxChange" checked>
+                                </div>
+                            </div>
+
+                            <div class="progressbar-card">
+                                <div class="progressbar-main">
+                                        <div id="progressbar-1" class="progressbar">
+                                         <div class="progress-label">
+                                          Very Easy
+                                         </div>
+                                         <div class="before">
+                                          <div class="bar tuse color1" id="progressColorBar-1" style="width: 0%;">
+                                           <span></span>
+                                          </div>
+                                         </div>
+                                         <div class="progress-count-label" id="progress-count-label-1">
+                                          0/0
+                                         </div>
+                                         <div class="progress-end-label" id="progress-end-label-1">
+                                          0.0%
+                                         </div>
+                                        </div>
+                                        <div id="progressbar-2" class="progressbar">
+                                         <div class="progress-label">
+                                          Easy
+                                         </div>
+                                         <div class="before">
+                                          <div class="bar tuse color2" id="progressColorBar-2" style="width: 0%;">
+                                           <span></span>
+                                          </div>
+                                         </div>
+                                         <div class="progress-count-label" id="progress-count-label-2">
+                                          0/0
+                                         </div>
+                                         <div class="progress-end-label" id="progress-end-label-2">
+                                          0.0%
+                                         </div>
+                                        </div>
+                                        <div id="progressbar-3" class="progressbar">
+                                         <div class="progress-label">
+                                          Medium
+                                         </div>
+                                         <div class="before">
+                                          <div class="bar tuse color3" id="progressColorBar-3" style="width: 0%;">
+                                           <span></span>
+                                          </div>
+                                         </div>
+                                         <div class="progress-count-label" id="progress-count-label-3">
+                                          0/0
+                                         </div>
+                                         <div class="progress-end-label" id="progress-end-label-3">
+                                          0.0%
+                                         </div>
+                                        </div>
+                                        <div id="progressbar-4" class="progressbar">
+                                         <div class="progress-label">
+                                          Hard
+                                         </div>
+                                         <div class="before">
+                                          <div class="bar tuse color4" id="progressColorBar-4" style="width: 0%;">
+                                           <span></span>
+                                          </div>
+                                         </div>
+                                         <div class="progress-count-label" id="progress-count-label-4">
+                                          0/0
+                                         </div>
+                                         <div class="progress-end-label" id="progress-end-label-4">
+                                          0.0%
+                                         </div>
+                                        </div>
+                                        <div id="progressbar-5" class="progressbar">
+                                         <div class="progress-label">
+                                          Very Hard
+                                         </div>
+                                         <div class="before">
+                                          <div class="bar tuse color5" id="progressColorBar-5" style="width: 0%;">
+                                           <span></span>
+                                          </div>
+                                         </div>
+                                         <div class="progress-count-label" id="progress-count-label-5">
+                                          0/0
+                                         </div>
+                                         <div class="progress-end-label" id="progress-end-label-5">
+                                          0.0%
+                                         </div>
+                                        </div>
+                                        <div id="progressbar-6" class="progressbar">
+                                         <div class="progress-label">
+                                          Extreme
+                                         </div>
+                                         <div class="before">
+                                          <div class="bar tuse color6" id="progressColorBar-6" style="width: 0%;">
+                                           <span></span>
+                                          </div>
+                                         </div>
+                                         <div class="progress-count-label" id="progress-count-label-6">
+                                          0/0
+                                         </div>
+                                         <div class="progress-end-label" id="progress-end-label-6">
+                                          0.0%
+                                         </div>
+                                        </div>
+                                        <div id="progressbar-7" class="progressbar">
+                                         <div class="progress-label">
+                                          Death
+                                         </div>
+                                         <div class="before">
+                                          <div class="bar tuse color7" id="progressColorBar-7" style="width: 0%;">
+                                           <span></span>
+                                          </div>
+                                         </div>
+                                         <div class="progress-count-label" id="progress-count-label-7">
+                                          0/0
+                                         </div>
+                                         <div class="progress-end-label" id="progress-end-label-7">
+                                          0.0%
+                                         </div>
+                                        </div>
+                                </div>
+                                <div class="progressbar-bonus">
+                                        <div id="bonus-progressbar-1" class="progressbar">
+                                         <div class="progress-label">
+                                          KZTimer
+                                         </div>
+                                         <div class="before">
+                                          <div class="bar tuse color2" id="bonus-progressColorBar-1" style="width: 0%;">
+                                           <span></span>
+                                          </div>
+                                         </div>
+                                         <div class="progress-count-label" id="bonus-progress-count-label-1">
+                                          0/0
+                                         </div>
+                                         <div class="progress-end-label" id="bonus-progress-end-label-1">
+                                          0.0%
+                                         </div>
+                                        </div>
+                                        <div id="bonus-progressbar-2" class="progressbar">
+                                         <div class="progress-label">
+                                          SimpleKZ
+                                         </div>
+                                         <div class="before">
+                                          <div class="bar tuse color3" id="bonus-progressColorBar-2" style="width: 0%;">
+                                           <span></span>
+                                          </div>
+                                         </div>
+                                         <div class="progress-count-label" id="bonus-progress-count-label-2">
+                                          0/0
+                                         </div>
+                                         <div class="progress-end-label" id="bonus-progress-end-label-2">
+                                          0.0%
+                                         </div>
+                                        </div>
+                                        <div id="bonus-progressbar-3" class="progressbar">
+                                         <div class="progress-label">
+                                          Vanilla
+                                         </div>
+                                         <div class="before">
+                                          <div class="bar tuse color4" id="bonus-progressColorBar-3" style="width: 0%;">
+                                           <span></span>
+                                          </div>
+                                         </div>
+                                         <div class="progress-count-label" id="bonus-progress-count-label-3">
+                                          0/0
+                                         </div>
+                                         <div class="progress-end-label" id="bonus-progress-end-label-3">
+                                          0.0%
+                                         </div>
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-row Tips">
+                        <div class="Tip">Tips: 进入页面后会自动加载地图列表，当上面按钮显示为Fetching时请耐心等待加载，多次点击按钮可能导致地图重复，如果长时间未获取到地图列表请刷新页面</div>
+                        <div class="Tip">地图列表有过滤器功能，点击地图名字可以查看当前模式的Top 100(bonus不行</div>
+                    </div>
+                    <div id="sheetContainer"></div>
+                    <div id="mapInfoContainer">
+                        <div class="mapInfo-main">
+                            <div class="layui-row">
+                                <div class="layui-col-xs3 mapNameAndImage">
+                                    <div id="mapName">
+                                        
+                                    </div>
+                                    <div id="mapTier">
+                                        Tier - <span id="tierText"></span>
+                                    </div>
+                                    <div id="mapMode">
+                                        
+                                    </div>
+                                    <div id="pro-wr" >
+                                        <span style="display: inline-block; width: 75px;">Pro WR</span>
+                                        <span id="pro-wrtime" style="color: orange;">N/A</span>
+                                    </div>
+                                    <div id="tp-wr" >
+                                        <span style="display: inline-block; width: 75px;">TP WR</span>
+                                        <span id="tp-wrtime" style="color: limegreen;">N/A</span>
+                                    </div>
+                                    <div id="mapImage">
+                                        <img src="" alt="Map preview image" loading="lazy" decoding="async">
+                                    </div>
+                                    <div class="layui-row layui-form">
+                                        <div class="layui-col-xs6 layui-col-xs-offset3" id="chartTypeChooser">
+                                            <select id="chartType" lay-filter="chartChange">
+                                                <option value="time">Times</option>
+                                                <option value="point">Points</option>
+                                                <option value="teleports">TPs</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="layui-col-xs9 chartContainer">
+                                    <canvas id="myChart" width="855" height="427"></canvas>
+                                </div>
+                            </div>
+                            <div class="layui-row table-container">
+                                <div class="layui-col-xs6 protable-container">
+                                    <div class="table-title">
+                                        Pro Top 100
+                                    </div>
+                                    <div class="pro-table record-table">
+
+                                    </div>
+                                </div>
+                                <div class="layui-col-xs6 tptable-container">
+                                    <div class="table-title">
+                                        TP Top 100
+                                    </div>
+                                    <div class="tp-table record-table">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+
+           
+        </div>
+        <div class="footer">
+            <div class="blur"></div>
+            <div class="footer-linklist">
+                <a href="https://www.pixiv.net/artworks/35231457" class="link-font" target="_blank" rel="noopener noreferrer">Background - メカニック・ロンド</a><span class="seperator">|</span>
+                <a href="./" class="link-font">GOKZ Globalstats</a>
+                 based on 
+                <a href="https://kz.gl" class="link-font" target="_blank" rel="noopener noreferrer">kz.gl</a>
+                 and 
+                <a href="https://gokzstats.com" class="link-font" target="_blank" rel="noopener noreferrer">GOKZ Stats</a>
+                 , thanks!
+            </div>
+            <div class="footer-icon">
+                <a href="https://steamcommunity.com/id/2rrrr" target="_blank" rel="noopener noreferrer"><i id="social-steam" class="fa fa-steam-square fa-3x social"></i></a>
+                <a href="mailto:2rrr@bakar.moe" target="_blank" rel="noopener noreferrer"><i id="social-em" class="fa fa-envelope-square fa-3x social"></i></a>
+            </div>
+        </div>
+    </body>
+    <script src='./assets/js/canvasstar.js'></script>
+    <script>
+        (function () {
+            var prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (prefersReducedMotion) {
+                var starCanvas = document.getElementById("star");
+                if (starCanvas) {
+                    starCanvas.style.display = "none";
+                }
+                return;
+            }
+            var canvasStar = new CanvasStar();
+            canvasStar.init();
+        })();
+    </script>
+</html>

@@ -1,0 +1,9 @@
+curl -X GET "https://kztimerglobal.com/api/v2.0/records/top/recent?has_teleports=false&tickrate=128&stage=1&modes_list_string=kz_timer&place_top_at_least=1&place_top_overall_at_least=1&limit=99999" -H "accept: application/json" > stage1.json
+curl -X GET "https://kztimerglobal.com/api/v2.0/records/top/recent?has_teleports=false&tickrate=128&stage=2&modes_list_string=kz_timer&place_top_at_least=1&place_top_overall_at_least=1&limit=9999" -H "accept: application/json" > stage2.json
+curl -X GET "https://kztimerglobal.com/api/v2.0/records/top/recent?has_teleports=false&tickrate=128&stage=3&modes_list_string=kz_timer&place_top_at_least=1&place_top_overall_at_least=1&limit=9999" -H "accept: application/json" > stage3.json
+curl -X GET "https://kztimerglobal.com/api/v2.0/records/top/recent?has_teleports=false&tickrate=128&stage=4&modes_list_string=kz_timer&place_top_at_least=1&place_top_overall_at_least=1&limit=9999" -H "accept: application/json" > stage4.json
+curl -X GET "https://kztimerglobal.com/api/v2.0/records/top/recent?has_teleports=false&tickrate=128&stage=5&modes_list_string=kz_timer&place_top_at_least=1&place_top_overall_at_least=1&limit=9999" -H "accept: application/json" > stage5.json
+curl -X GET "https://kztimerglobal.com/api/v2.0/records/top/recent?has_teleports=false&tickrate=128&stage=6&modes_list_string=kz_timer&place_top_at_least=1&place_top_overall_at_least=1&limit=9999" -H "accept: application/json" > stage6.json
+curl -X GET "https://kztimerglobal.com/api/v2.0/records/top/recent?has_teleports=false&tickrate=128&stage=7&modes_list_string=kz_timer&place_top_at_least=1&place_top_overall_at_least=1&limit=9999" -H "accept: application/json" > stage7.json
+curl -X GET "https://kztimerglobal.com/api/v2.0/records/top/recent?has_teleports=false&tickrate=128&stage=8&modes_list_string=kz_timer&place_top_at_least=1&place_top_overall_at_least=1&limit=9999" -H "accept: application/json" > stage8.json
+python process.py
