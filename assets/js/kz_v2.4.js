@@ -66,6 +66,16 @@ const RANKING = {
     0: "NEWBIE"
 }
 
+const TIER_STYLE_CLASS = {
+    1: "st0",
+    2: "st1",
+    3: "st2",
+    4: "st5",
+    5: "st4",
+    6: "st9",
+    7: "st12"
+};
+
 const STEAMID_PERSISTENT = "STEAMID-PERSISTENT";
 const USE_STEAMID_PERSISTENT = "USE-STEAMID-PERSISTENT";
 
@@ -82,6 +92,12 @@ var URI = getURIVars();
 var datapoints;
 var proTop, protable;
 var tpTop, tptable;
+var mapWrCache = {};
+
+function getTierStyleClass(tierValue) {
+    const tier = Number(tierValue);
+    return TIER_STYLE_CLASS[tier] || "";
+}
 
 function useSteamIDPersistent() {
     return localStorage.getItem(USE_STEAMID_PERSISTENT) !== null && localStorage.getItem(USE_STEAMID_PERSISTENT) === "true";
@@ -176,6 +192,62 @@ function getTimeFromSeconds(seconds) {
 		}
 		else return seconds;
 	}	
+}
+
+function getWrDiffColor(diffPercent) {
+    if (diffPercent <= 10) {
+        return "#22b14c";
+    }
+    if (diffPercent <= 30) {
+        return "#ff8c1a";
+    }
+    return "#e53935";
+}
+
+function formatCompactTimeWithWrDiff(currentTimeSeconds, wrTimeSeconds) {
+    const formattedTime = getTimeFromSeconds(currentTimeSeconds);
+    if (!Number.isFinite(wrTimeSeconds) || wrTimeSeconds <= 0) {
+        return formattedTime;
+    }
+
+    const diffSeconds = Math.max(0, currentTimeSeconds - wrTimeSeconds);
+    if (diffSeconds <= 0.0005) {
+        return formattedTime;
+    }
+    const diffPercent = (diffSeconds / wrTimeSeconds) * 100;
+    const diffColor = getWrDiffColor(diffPercent);
+    const formattedDiff = getTimeFromSeconds(diffSeconds);
+    return `${formattedTime} <span style="color: ${diffColor};">(+${formattedDiff})</span>`;
+}
+
+function loadMapWrLookup(mode, hasTeleports, onDone) {
+    const modeName = modeList[mode];
+    const isOverall = hasTeleports ? "true" : "false";
+    const cacheKey = `${modeName}|${isOverall}`;
+
+    if (mapWrCache[cacheKey]) {
+        onDone(mapWrCache[cacheKey]);
+        return;
+    }
+
+    const wrURL = proxyURL + 'https://api.gokz.top/api/v1/maps/wrs?is_overall=' + isOverall + '&mode=' + modeName;
+    $.getJSON(wrURL, function (wrData) {
+        const wrLookup = {};
+        wrData.forEach((wr) => {
+            const mapName = wr["map_name"];
+            const wrTime = +wr["time"];
+            if (!mapName || !Number.isFinite(wrTime)) {
+                return;
+            }
+            if (typeof wrLookup[mapName] === 'undefined' || wrTime < wrLookup[mapName]) {
+                wrLookup[mapName] = wrTime;
+            }
+        });
+        mapWrCache[cacheKey] = wrLookup;
+        onDone(wrLookup);
+    }).fail(function () {
+        onDone({});
+    });
 }
 
 function isValidSteamID(steamID) {
@@ -363,68 +435,72 @@ function retrieveStats(steamid32, hasTeleports, mode, init){
         }
 
         let requestURL = mapRequestBaseURL + steamid32 + '&tickrate=128&stage=0&limit=1000&has_teleports=' + hasTeleports + '&modes_list_string=' + modeList[mode];
-    
-        $.getJSON(requestURL, function(jsonData){
-            if (jsonData.length == 0) {
-                alert("No Times Found for " + steamid32);
-                $("#steamButton").text('Fetch Times');
-                return true;
-            }
-            window.history.pushState("object or string", "Title", "?steamid=" + steamid32 + "&teleports=" + hasTeleports + '&mode=' + queryMode);
-            jsonData.forEach((record) => {
-                let mapName = record["map_name"];
-                let time = getTimeFromSeconds(record["time"]);
-                let tps = record["teleports"];
-                let pts = record["points"];
-                let tier = mapDiffInfo[mapName];
-                let date = record["created_on"].replace('T', ' ');
-                let server;
-                if (typeof record["server_name"] === "string") {
-                    server = record["server_name"].substring(0, 35);
+
+        loadMapWrLookup(mode, hasTeleports, function(mapWrLookup){
+            $.getJSON(requestURL, function(jsonData){
+                if (jsonData.length == 0) {
+                    alert("No Times Found for " + steamid32);
+                    $("#steamButton").text('Fetch Times');
+                    return true;
                 }
-                else{
-                    server = 'N/A';
-                }
-    
-                if(mapName && time && (typeof tps !== 'undefined') && pts && tier && date && server 
-                    && (typeof mapIndex[mapName] !== 'undefined') && (pts > maps[mapIndex[mapName]][3])){
-                    playerInfo["runs-total"]++;
-                    playerInfo["runs-by-tier"][tier]++;
-                    playerInfo["points-total"] += pts;
-                    playerInfo["points-total-by-tier"][tier] += pts;
-                    if(pts >= 800){
-                        playerInfo["bronzes-by-tier"][tier]++;
-                        if(pts < 900){
-                            playerInfo["bronzes"]++;
+                window.history.pushState("object or string", "Title", "?steamid=" + steamid32 + "&teleports=" + hasTeleports + '&mode=' + queryMode);
+                jsonData.forEach((record) => {
+                    let mapName = record["map_name"];
+                    let rawTime = +record["time"];
+                    let tps = record["teleports"];
+                    let pts = record["points"];
+                    let tier = mapDiffInfo[mapName];
+                    let date = record["created_on"].replace('T', ' ');
+                    let server;
+                    if (typeof record["server_name"] === "string") {
+                        server = record["server_name"].substring(0, 35);
+                    }
+                    else{
+                        server = 'N/A';
+                    }
+        
+                    if(mapName && Number.isFinite(rawTime) && (typeof tps !== 'undefined') && pts && tier && date && server 
+                        && (typeof mapIndex[mapName] !== 'undefined') && (pts > maps[mapIndex[mapName]][3])){
+                        playerInfo["runs-total"]++;
+                        playerInfo["runs-by-tier"][tier]++;
+                        playerInfo["points-total"] += pts;
+                        playerInfo["points-total-by-tier"][tier] += pts;
+                        if(pts >= 800){
+                            playerInfo["bronzes-by-tier"][tier]++;
+                            if(pts < 900){
+                                playerInfo["bronzes"]++;
+                            }
                         }
-                    }
-                    if(pts >= 900){
-                        playerInfo["silvers-by-tier"][tier]++;
-                        if(pts < 1000){
-                            playerInfo["silvers"]++;
+                        if(pts >= 900){
+                            playerInfo["silvers-by-tier"][tier]++;
+                            if(pts < 1000){
+                                playerInfo["silvers"]++;
+                            }
                         }
+                        if(pts == 1000){
+                            pts = '🏆';
+                            playerInfo["world-records"]++;
+                            playerInfo["records-by-tier"][tier]++;
+                        }
+                        const wrTime = mapWrLookup[mapName];
+                        const timeWithWrDiff = formatCompactTimeWithWrDiff(rawTime, wrTime);
+                        maps[mapIndex[mapName]] = [
+                            mapName,
+                            timeWithWrDiff,
+                            tps,
+                            pts,
+                            tier,
+                            date,
+                            server
+                        ];
                     }
-                    if(pts == 1000){
-                        pts = '🏆';
-                        playerInfo["world-records"]++;
-                        playerInfo["records-by-tier"][tier]++;
-                    }
-                    maps[mapIndex[mapName]] = [
-                        mapName,
-                        time,
-                        tps,
-                        pts,
-                        tier,
-                        date,
-                        server
-                    ];
-                }
+                });
+                printPlayerProfile(false);
+                genMainList();
+                $("#steamButton").text("Fetch Times");
+            }).fail(function () {
+                handleRequestError("Failed to load player records. Please retry.");
             });
-            printPlayerProfile(false);
-            genMainList();
-            $("#steamButton").text("Fetch Times");
-        }).fail(function () {
-            handleRequestError("Failed to load player records. Please retry.");
         });
     }
 
@@ -525,7 +601,7 @@ function genMainList(){
     if(globalTable){
         globalTable.destroy();
     }
-    let colWidth = [185, 85, 65, 65, 70, 180, 275];
+    let colWidth = [215, 180, 65, 65, 70, 180, 275];
     let filterArray = [0, 4, 5, 6];
     let cols = [
         {
@@ -534,9 +610,12 @@ function genMainList(){
             renderer: function(instance, td, row, col, prop, value, cellProperties) {
                 Handsontable.renderers.TextRenderer.apply(this, arguments);
                 const mapName = value || "";
+                const tierColIndex = headerList.indexOf("Tier");
+                const tierValue = instance.getDataAtCell(row, tierColIndex);
+                const tierClass = getTierStyleClass(tierValue);
                 td.innerHTML = "";
                 const mapLink = document.createElement("span");
-                mapLink.className = "table-link";
+                mapLink.className = tierClass ? "table-link tier-rank " + tierClass : "table-link tier-rank";
                 mapLink.textContent = mapName;
                 mapLink.addEventListener("click", function () {
                     displayMap(mapName);
@@ -546,10 +625,50 @@ function genMainList(){
                 return td;
             }
         },
+        {
+            className: "htLeft",
+            readOnly: true,
+            renderer: function(instance, td, row, col, prop, value, cellProperties) {
+                td.innerHTML = value || "";
+                td.style.whiteSpace = "nowrap";
+                td.style.textAlign = "left";
+                td.style.verticalAlign = "middle";
+                return td;
+            }
+        },
         {readOnly: true},
-        {readOnly: true},
-        {readOnly: true},
-        {readOnly: true},
+        {
+            readOnly: true,
+            renderer: function(instance, td, row, col, prop, value, cellProperties) {
+                const ptsValue = Number(value);
+                const isWorldRecord = value === "🏆";
+                let ptsClass = "";
+                if (isWorldRecord || (!Number.isNaN(ptsValue) && ptsValue >= 900)) {
+                    ptsClass = "pts-silver-glow";
+                } else if (!Number.isNaN(ptsValue) && ptsValue >= 800) {
+                    ptsClass = "pts-bronze-glow";
+                }
+
+                td.innerHTML = "";
+                const ptsNode = document.createElement("span");
+                ptsNode.className = ptsClass ? "pts-rank " + ptsClass : "pts-rank";
+                ptsNode.textContent = (value === 0 ? "0" : (value || ""));
+                td.appendChild(ptsNode);
+                return td;
+            }
+        },
+        {
+            readOnly: true,
+            renderer: function(instance, td, row, col, prop, value, cellProperties) {
+                const tierClass = getTierStyleClass(value);
+                td.innerHTML = "";
+                const tierNode = document.createElement("span");
+                tierNode.className = tierClass ? "tier-rank " + tierClass : "tier-rank";
+                tierNode.textContent = value || "";
+                td.appendChild(tierNode);
+                return td;
+            }
+        },
         {readOnly: true},
         {readOnly: true}
     ];

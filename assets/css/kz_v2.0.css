@@ -399,8 +399,84 @@ input::-webkit-input-placeholder { /* WebKit browsers 适配谷歌 */
     color: #f0f0f0;
 }
 
-.table-link:hover{
+.table-link:not(.tier-rank):hover{
     color: #93d1ff;
+}
+
+.handsontable .tier-rank{
+    display: inline-block;
+}
+
+.handsontable .pts-rank{
+    display: inline-block;
+}
+
+.handsontable .pts-rank.pts-silver-glow{
+    color: #ffffff;
+    text-shadow: -1px 0 #c0c0c0, 0 1px #c0c0c0, 1px 0 #c0c0c0, 0 -1px #c0c0c0, 0 0 10px #c0c0c0;
+}
+
+.handsontable .pts-rank.pts-bronze-glow{
+    color: #ffffff;
+    text-shadow: -1px 0 #cd7f32, 0 1px #cd7f32, 1px 0 #cd7f32, 0 -1px #cd7f32, 0 0 10px #cd7f32;
+}
+
+.handsontable .tier-rank.st0,
+.handsontable .tier-rank.st1,
+.handsontable .tier-rank.st2,
+.handsontable .tier-rank.st4,
+.handsontable .tier-rank.st5,
+.handsontable .tier-rank.st9,
+.handsontable .tier-rank.st11{
+    color: #ffffff;
+    text-shadow: -1px 0 var(--tier-glow), 0 1px var(--tier-glow), 1px 0 var(--tier-glow), 0 -1px var(--tier-glow), 0 0 10px var(--tier-glow);
+}
+
+.handsontable .tier-rank.st12{
+    background: linear-gradient(to left, red, violet, indigo, blue, green, yellow, orange, red, violet);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: rainbow_animation 3s ease-in-out infinite;
+    background-size: 800% 100%;
+    text-shadow: -1px 0 rgba(191, 191, 191, 0.2), 0 1px rgba(191, 191, 191, 0.2), 1px 0 rgba(191, 191, 191, 0.2), 0 -1px rgba(191, 191, 191, 0.2), 0 0 10px rgba(191, 191, 191, 0.2);
+}
+
+.handsontable .tier-rank.st0{
+    --tier-glow: #98dd58;
+}
+
+.handsontable .tier-rank.st1{
+    --tier-glow: green;
+}
+
+.handsontable .tier-rank.st2{
+    --tier-glow: #186de2;
+}
+
+.handsontable .tier-rank.st5{
+    --tier-glow: orange;
+}
+
+.handsontable .tier-rank.st4{
+    --tier-glow: #e81957;
+}
+
+.handsontable .tier-rank.st9{
+    --tier-glow: #9f35ff;
+}
+
+.handsontable .tier-rank.st11{
+    --tier-glow: black;
+}
+
+@keyframes rainbow_animation {
+    0%, 100% {
+        background-position: 0 0;
+    }
+    50% {
+        background-position: 50% 0;
+    }
 }
 
 .handsontable{
