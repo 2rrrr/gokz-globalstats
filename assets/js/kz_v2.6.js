@@ -220,6 +220,94 @@ function formatCompactTimeWithWrDiff(currentTimeSeconds, wrTimeSeconds) {
     return `${formattedTime} <span style="color: ${diffColor};">(+${formattedDiff})</span>`;
 }
 
+function parseDisplayTimeToSeconds(value) {
+    if (typeof value === "number") {
+        return Number.isFinite(value) ? value : NaN;
+    }
+    if (typeof value !== "string") {
+        return NaN;
+    }
+
+    const plainText = value.replace(/<[^>]*>/g, " ").trim();
+    const timeMatch = plainText.match(/\d+(?::\d{1,2}){0,2}\.\d{3}|\d+(?::\d{1,2}){1,2}/);
+    if (!timeMatch) {
+        return NaN;
+    }
+
+    const timeText = timeMatch[0];
+    const parts = timeText.split(":");
+    let seconds = parseFloat(parts.pop());
+    if (!Number.isFinite(seconds)) {
+        return NaN;
+    }
+    if (parts.length > 0) {
+        seconds += parseInt(parts.pop(), 10) * 60;
+    }
+    if (parts.length > 0) {
+        seconds += parseInt(parts.pop(), 10) * 3600;
+    }
+    return seconds;
+}
+
+function createTimeCompareFunctionFactory() {
+    return function (sortOrder) {
+        return function (value, nextValue) {
+            const firstTextValue = typeof value === "string" ? value.trim() : value;
+            const secondTextValue = typeof nextValue === "string" ? nextValue.trim() : nextValue;
+            const firstIsNA = firstTextValue === "N/A";
+            const secondIsNA = secondTextValue === "N/A";
+            if (firstIsNA && secondIsNA) {
+                return 0;
+            }
+            if (firstIsNA) {
+                return 1;
+            }
+            if (secondIsNA) {
+                return -1;
+            }
+
+            const firstSeconds = parseDisplayTimeToSeconds(value);
+            const secondSeconds = parseDisplayTimeToSeconds(nextValue);
+            const firstIsTime = Number.isFinite(firstSeconds);
+            const secondIsTime = Number.isFinite(secondSeconds);
+            const direction = sortOrder === "desc" ? -1 : 1;
+
+            if (firstIsTime && secondIsTime) {
+                if (firstSeconds === secondSeconds) {
+                    return 0;
+                }
+                return firstSeconds < secondSeconds ? -direction : direction;
+            }
+
+            if (value === nextValue) {
+                return 0;
+            }
+            if (value == null || value === "") {
+                return 1;
+            }
+            if (nextValue == null || nextValue === "") {
+                return -1;
+            }
+
+            const firstNumber = typeof value === "number" ? value : Number(value);
+            const secondNumber = typeof nextValue === "number" ? nextValue : Number(nextValue);
+            if (Number.isFinite(firstNumber) && Number.isFinite(secondNumber)) {
+                if (firstNumber === secondNumber) {
+                    return 0;
+                }
+                return firstNumber < secondNumber ? -direction : direction;
+            }
+
+            const firstText = String(value).toLowerCase();
+            const secondText = String(nextValue).toLowerCase();
+            if (firstText === secondText) {
+                return 0;
+            }
+            return firstText < secondText ? -direction : direction;
+        };
+    };
+}
+
 function loadMapWrLookup(mode, hasTeleports, onDone) {
     const modeName = modeList[mode];
     const isOverall = hasTeleports ? "true" : "false";
@@ -762,11 +850,23 @@ function generateTable(container, data, header, colWidth, filterArray, initialSo
 		}
 	};
 
-		const sortConfig = initialSort || {
-			column: 0,
-			sortOrder: "asc"
-		};
-    
+	const sortConfig = initialSort || {
+		column: 0,
+		sortOrder: "asc"
+	};
+	const timeColumnIndex = header.indexOf("Time");
+	const columnsWithSorting = cols.map(function (col, index) {
+		if (index !== timeColumnIndex) {
+			return col;
+		}
+		return Object.assign({}, col, {
+			type: 'text',
+			multiColumnSorting: {
+				compareFunctionFactory: createTimeCompareFunctionFactory()
+			}
+		});
+	});
+
     var mapTable = new Handsontable(container, {
         data: data,
         height: 890,
@@ -777,7 +877,7 @@ function generateTable(container, data, header, colWidth, filterArray, initialSo
         multiColumnSorting: {
             initialConfig: sortConfig
         },
-        columns: cols,
+        columns: columnsWithSorting,
 		afterGetColHeader: addInput,
         beforeOnCellMouseDown: doNotSelectColumn,
         licenseKey: 'non-commercial-and-evaluation'
