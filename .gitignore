@@ -19,6 +19,7 @@ Thumbs.db
 .idea/
 .agents/
 .codex/
+.git-local/
 
 # Logs and temporary files
 *.log
