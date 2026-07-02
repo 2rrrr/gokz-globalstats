@@ -21,10 +21,6 @@ Thumbs.db
 .codex/
 .git-local/
 
-# Search engine verification pages
-baidu_verify_*.html
-google*.html
-
 # Logs and temporary files
 *.log
 *.tmp
